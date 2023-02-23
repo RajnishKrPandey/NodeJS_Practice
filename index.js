@@ -1,58 +1,77 @@
 const express = require('express');
-const format = require('date-format');
+
 const app = express();
 
-// swagger docs related
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./swagger.yaml');
+const fileUpload = require('express-fileupload');
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(express.json());
+app.use(fileUpload());
 
-const PORT = process.env.PORT || 4000;
+let courses = [
+  {
+    id: '11',
+    name: 'Learn Reactjs',
+    price: 299,
+  },
+  {
+    id: '22',
+    name: 'Learn Angular',
+    price: 399,
+  },
+  {
+    id: '33',
+    name: 'Learn Django',
+    price: 499,
+  },
+];
 
 app.get('/', (req, res) => {
-  res.status(200).send('<h1>Hello from LCO</h1>');
+  res.send('hello from Rajnish Pandey');
 });
 
-app.get('/api/v1/instagram', (req, res) => {
-  const instaSocial = {
-    username: 'RajnishPandeyOfficial',
-    folowers: 66,
-    follows: 70,
-    date: format.asString('dd[MM] - hh:mm:ss', new Date()),
-  };
-
-  res.status(200).json(instaSocial);
+app.get('/api/v1/rajnish', (req, res) => {
+  res.send('hello from rajnish pandey');
 });
 
-app.get('/api/v1/facebook', (req, res) => {
-  const instaSocial = {
-    username: 'RajnishPandeyPage',
-    folowers: 88,
-    follows: 10,
-    date: format.asString('dd[MM] - hh:mm:ss', new Date()),
-  };
-
-  res.status(200).json(instaSocial);
+app.get('/api/v1/lcoobject', (req, res) => {
+  res.send({ id: '55', name: 'Learn Backend', price: 999 });
 });
 
-app.get('/api/v1/linkedin', (req, res) => {
-  const instaSocial = {
-    username: 'RajnishPandey',
-    folowers: 800,
-    follows: 80,
-    date: new Date(),
-  };
-
-  res.status(200).json(instaSocial);
+app.get('/api/v1/courses', (req, res) => {
+  res.send(courses);
 });
 
-app.get('/api/v1/:token', (req, res) => {
-  console.log(req.params.token);
-  res.status(200).json({ param: req.params.token });
+app.get('/api/v1/mycourse/:courseId', (req, res) => {
+  const myCourse = courses.find((course) => course.id === req.params.courseId);
+  res.send(myCourse);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running at ${PORT}`);
+app.post('/api/v1/addCourse', (req, res) => {
+  console.log(req.body);
+  courses.push(req.body);
+  res.send(true);
 });
+
+app.get('/api/v1/coursequery', (req, res) => {
+  let location = req.query.location;
+  let device = req.query.device;
+
+  res.send({ location, device });
+});
+
+app.post('/api/v1/courseupload', (req, res) => {
+  console.log(req.headers);
+  const file = req.files.file;
+  console.log(file);
+  let path = __dirname + '/images/' + Date.now() + '.jpg';
+
+  file.mv(path, (err) => {
+    res.send(true);
+  });
+});
+
+app.listen(4000, () => console.log(`Server is running at port 4000...`));
